@@ -29,6 +29,9 @@ services/ui/.vite/
 # Data, Models, Volumes & Artifacts
 data/
 models/
+*.db
+*.sqlite
+*.sqlite3
 *.gguf
 *.bin
 *.safetensors
