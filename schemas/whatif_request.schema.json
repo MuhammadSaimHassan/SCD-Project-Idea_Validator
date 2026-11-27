@@ -1,0 +1,296 @@
+{
+  "$defs": {
+    "ComputeTier": {
+      "enum": [
+        "laptop",
+        "free_gpu",
+        "paid"
+      ],
+      "title": "ComputeTier",
+      "type": "string"
+    },
+    "DimensionName": {
+      "enum": [
+        "demand_pain",
+        "competition",
+        "differentiation",
+        "feasibility",
+        "risk",
+        "learning"
+      ],
+      "title": "DimensionName",
+      "type": "string"
+    },
+    "DimensionScore": {
+      "additionalProperties": false,
+      "description": "Single dimension score emitted by M9 scorers using M10.",
+      "properties": {
+        "dimension": {
+          "$ref": "#/$defs/DimensionName"
+        },
+        "score": {
+          "maximum": 5.0,
+          "minimum": 0.0,
+          "title": "Score",
+          "type": "number"
+        },
+        "confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "features": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "title": "Features",
+          "type": "object"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "rubric_version": {
+          "minLength": 1,
+          "title": "Rubric Version",
+          "type": "string"
+        },
+        "model": {
+          "minLength": 1,
+          "title": "Model",
+          "type": "string"
+        },
+        "abstained": {
+          "default": false,
+          "title": "Abstained",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "dimension",
+        "score",
+        "confidence",
+        "reason",
+        "rubric_version",
+        "model"
+      ],
+      "title": "DimensionScore",
+      "type": "object"
+    },
+    "GateInputs": {
+      "additionalProperties": false,
+      "description": "Non-score facts needed by M11 hard gates.",
+      "properties": {
+        "n_sources": {
+          "minimum": 0,
+          "title": "N Sources",
+          "type": "integer"
+        },
+        "n_platforms": {
+          "minimum": 0,
+          "title": "N Platforms",
+          "type": "integer"
+        },
+        "estimated_build_hours": {
+          "minimum": 0.0,
+          "title": "Estimated Build Hours",
+          "type": "number"
+        },
+        "risk_blockers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Risk Blockers",
+          "type": "array"
+        },
+        "duplicate_product_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duplicate Product Name"
+        }
+      },
+      "required": [
+        "n_sources",
+        "n_platforms",
+        "estimated_build_hours"
+      ],
+      "title": "GateInputs",
+      "type": "object"
+    },
+    "GoalType": {
+      "enum": [
+        "startup",
+        "portfolio",
+        "course_project"
+      ],
+      "title": "GoalType",
+      "type": "string"
+    },
+    "StudentProfile": {
+      "additionalProperties": false,
+      "description": "Student profile stored in M2 and used for personalized feasibility/weights.",
+      "properties": {
+        "user_id": {
+          "minLength": 1,
+          "title": "User Id",
+          "type": "string"
+        },
+        "skills": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Skills",
+          "type": "array"
+        },
+        "hours_per_week": {
+          "exclusiveMinimum": 0,
+          "title": "Hours Per Week",
+          "type": "number"
+        },
+        "weeks_available": {
+          "exclusiveMinimum": 0,
+          "title": "Weeks Available",
+          "type": "number"
+        },
+        "team_size": {
+          "minimum": 1,
+          "title": "Team Size",
+          "type": "integer"
+        },
+        "compute": {
+          "$ref": "#/$defs/ComputeTier",
+          "default": "laptop"
+        },
+        "goal": {
+          "$ref": "#/$defs/GoalType"
+        },
+        "interests": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Interests",
+          "type": "array"
+        },
+        "profile_version": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Profile Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "user_id",
+        "hours_per_week",
+        "weeks_available",
+        "team_size",
+        "goal"
+      ],
+      "title": "StudentProfile",
+      "type": "object"
+    },
+    "VerdictRequest": {
+      "additionalProperties": false,
+      "description": "M11 POST /verdict request.",
+      "properties": {
+        "idea_id": {
+          "minLength": 1,
+          "title": "Idea Id",
+          "type": "string"
+        },
+        "version": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "run_id": {
+          "minLength": 1,
+          "title": "Run Id",
+          "type": "string"
+        },
+        "profile": {
+          "$ref": "#/$defs/StudentProfile"
+        },
+        "scores": {
+          "items": {
+            "$ref": "#/$defs/DimensionScore"
+          },
+          "title": "Scores",
+          "type": "array"
+        },
+        "gate_inputs": {
+          "$ref": "#/$defs/GateInputs"
+        },
+        "accepted_objections": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/DimensionName"
+          },
+          "title": "Accepted Objections",
+          "type": "object"
+        }
+      },
+      "required": [
+        "idea_id",
+        "run_id",
+        "profile",
+        "scores",
+        "gate_inputs"
+      ],
+      "title": "VerdictRequest",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "M11 POST /whatif request.",
+  "properties": {
+    "verdict_request": {
+      "$ref": "#/$defs/VerdictRequest"
+    },
+    "dimension_override": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "propertyNames": {
+        "$ref": "#/$defs/DimensionName"
+      },
+      "title": "Dimension Override",
+      "type": "object"
+    }
+  },
+  "required": [
+    "verdict_request"
+  ],
+  "title": "WhatIfRequest",
+  "type": "object"
+}

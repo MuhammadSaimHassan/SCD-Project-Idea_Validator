@@ -1,0 +1,50 @@
+{
+  "$defs": {
+    "CheckClaimResult": {
+      "additionalProperties": false,
+      "description": "Per-claim verification outcome from M12.",
+      "properties": {
+        "claim_id": {
+          "title": "Claim Id",
+          "type": "string"
+        },
+        "supported": {
+          "title": "Supported",
+          "type": "boolean"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "claim_id",
+        "supported",
+        "reason"
+      ],
+      "title": "CheckClaimResult",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "M12 POST /check response.",
+  "properties": {
+    "results": {
+      "items": {
+        "$ref": "#/$defs/CheckClaimResult"
+      },
+      "title": "Results",
+      "type": "array"
+    },
+    "all_supported": {
+      "title": "All Supported",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "results",
+    "all_supported"
+  ],
+  "title": "CheckResponse",
+  "type": "object"
+}

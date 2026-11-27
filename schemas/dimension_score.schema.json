@@ -1,0 +1,91 @@
+{
+  "$defs": {
+    "DimensionName": {
+      "enum": [
+        "demand_pain",
+        "competition",
+        "differentiation",
+        "feasibility",
+        "risk",
+        "learning"
+      ],
+      "title": "DimensionName",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Single dimension score emitted by M9 scorers using M10.",
+  "properties": {
+    "dimension": {
+      "$ref": "#/$defs/DimensionName"
+    },
+    "score": {
+      "maximum": 5.0,
+      "minimum": 0.0,
+      "title": "Score",
+      "type": "number"
+    },
+    "confidence": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "evidence_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence Ids",
+      "type": "array"
+    },
+    "features": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      },
+      "title": "Features",
+      "type": "object"
+    },
+    "reason": {
+      "title": "Reason",
+      "type": "string"
+    },
+    "rubric_version": {
+      "minLength": 1,
+      "title": "Rubric Version",
+      "type": "string"
+    },
+    "model": {
+      "minLength": 1,
+      "title": "Model",
+      "type": "string"
+    },
+    "abstained": {
+      "default": false,
+      "title": "Abstained",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "dimension",
+    "score",
+    "confidence",
+    "reason",
+    "rubric_version",
+    "model"
+  ],
+  "title": "DimensionScore",
+  "type": "object"
+}

@@ -1,0 +1,24 @@
+version: w1
+
+goals:
+  startup:
+    demand_pain: 25
+    competition: 20
+    differentiation: 20
+    feasibility: 15
+    risk: 15
+    learning: 5
+  portfolio:
+    demand_pain: 15
+    competition: 15
+    differentiation: 15
+    feasibility: 25
+    risk: 10
+    learning: 20
+  course_project:
+    demand_pain: 10
+    competition: 10
+    differentiation: 15
+    feasibility: 35
+    risk: 10
+    learning: 20

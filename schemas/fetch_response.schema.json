@@ -1,0 +1,46 @@
+{
+  "additionalProperties": false,
+  "description": "M5 POST /fetch response after allow-list, rate limit, cache, and sanitiser.",
+  "properties": {
+    "url": {
+      "title": "Url",
+      "type": "string"
+    },
+    "source": {
+      "title": "Source",
+      "type": "string"
+    },
+    "status_code": {
+      "title": "Status Code",
+      "type": "integer"
+    },
+    "content": {
+      "title": "Content",
+      "type": "string"
+    },
+    "cache_hit": {
+      "default": false,
+      "title": "Cache Hit",
+      "type": "boolean"
+    },
+    "sanitized_injections": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Sanitized Injections",
+      "type": "integer"
+    },
+    "fetched_at": {
+      "title": "Fetched At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "url",
+    "source",
+    "status_code",
+    "content",
+    "fetched_at"
+  ],
+  "title": "FetchResponse",
+  "type": "object"
+}

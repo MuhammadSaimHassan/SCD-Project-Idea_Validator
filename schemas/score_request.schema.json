@@ -1,0 +1,127 @@
+{
+  "$defs": {
+    "DimensionName": {
+      "enum": [
+        "demand_pain",
+        "competition",
+        "differentiation",
+        "feasibility",
+        "risk",
+        "learning"
+      ],
+      "title": "DimensionName",
+      "type": "string"
+    },
+    "EvidenceItem": {
+      "additionalProperties": false,
+      "description": "Retrieved evidence snippet from M6 with traceable card citation.",
+      "properties": {
+        "evidence_id": {
+          "description": "Format: <card_id>#c<chunk>",
+          "minLength": 1,
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "card_id": {
+          "minLength": 1,
+          "title": "Card Id",
+          "type": "string"
+        },
+        "quote": {
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "url": {
+          "minLength": 1,
+          "title": "Url",
+          "type": "string"
+        },
+        "retrieved_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "title": "Retrieved At"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "card_id",
+        "quote",
+        "source",
+        "url",
+        "retrieved_at"
+      ],
+      "title": "EvidenceItem",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "M10 POST /score request.",
+  "properties": {
+    "dimension": {
+      "$ref": "#/$defs/DimensionName"
+    },
+    "rubric_version": {
+      "minLength": 1,
+      "title": "Rubric Version",
+      "type": "string"
+    },
+    "rubric_text": {
+      "minLength": 1,
+      "title": "Rubric Text",
+      "type": "string"
+    },
+    "idea_text": {
+      "minLength": 1,
+      "title": "Idea Text",
+      "type": "string"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/EvidenceItem"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "features": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      },
+      "title": "Features",
+      "type": "object"
+    }
+  },
+  "required": [
+    "dimension",
+    "rubric_version",
+    "rubric_text",
+    "idea_text"
+  ],
+  "title": "ScoreRequest",
+  "type": "object"
+}

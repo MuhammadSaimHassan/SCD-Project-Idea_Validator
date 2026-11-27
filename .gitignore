@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.Python
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+kubeconfig*
+
+# Node / UI
+node_modules/
+services/ui/dist/
+services/ui/.vite/
+
+# Data, Models, Volumes & Artifacts
+data/
+models/
+*.gguf
+*.bin
+*.safetensors
+traces/*.jsonl
+eval/results/*.json
+!eval/results/.gitkeep
+
+# OS & Editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

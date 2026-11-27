@@ -1,0 +1,82 @@
+{
+  "$defs": {
+    "ComputeTier": {
+      "enum": [
+        "laptop",
+        "free_gpu",
+        "paid"
+      ],
+      "title": "ComputeTier",
+      "type": "string"
+    },
+    "GoalType": {
+      "enum": [
+        "startup",
+        "portfolio",
+        "course_project"
+      ],
+      "title": "GoalType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Student profile stored in M2 and used for personalized feasibility/weights.",
+  "properties": {
+    "user_id": {
+      "minLength": 1,
+      "title": "User Id",
+      "type": "string"
+    },
+    "skills": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Skills",
+      "type": "array"
+    },
+    "hours_per_week": {
+      "exclusiveMinimum": 0,
+      "title": "Hours Per Week",
+      "type": "number"
+    },
+    "weeks_available": {
+      "exclusiveMinimum": 0,
+      "title": "Weeks Available",
+      "type": "number"
+    },
+    "team_size": {
+      "minimum": 1,
+      "title": "Team Size",
+      "type": "integer"
+    },
+    "compute": {
+      "$ref": "#/$defs/ComputeTier",
+      "default": "laptop"
+    },
+    "goal": {
+      "$ref": "#/$defs/GoalType"
+    },
+    "interests": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Interests",
+      "type": "array"
+    },
+    "profile_version": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Profile Version",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "user_id",
+    "hours_per_week",
+    "weeks_available",
+    "team_size",
+    "goal"
+  ],
+  "title": "StudentProfile",
+  "type": "object"
+}

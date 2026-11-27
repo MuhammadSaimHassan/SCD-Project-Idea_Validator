@@ -1,0 +1,369 @@
+{
+  "$defs": {
+    "DimensionName": {
+      "enum": [
+        "demand_pain",
+        "competition",
+        "differentiation",
+        "feasibility",
+        "risk",
+        "learning"
+      ],
+      "title": "DimensionName",
+      "type": "string"
+    },
+    "DimensionScore": {
+      "additionalProperties": false,
+      "description": "Single dimension score emitted by M9 scorers using M10.",
+      "properties": {
+        "dimension": {
+          "$ref": "#/$defs/DimensionName"
+        },
+        "score": {
+          "maximum": 5.0,
+          "minimum": 0.0,
+          "title": "Score",
+          "type": "number"
+        },
+        "confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "features": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "title": "Features",
+          "type": "object"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "rubric_version": {
+          "minLength": 1,
+          "title": "Rubric Version",
+          "type": "string"
+        },
+        "model": {
+          "minLength": 1,
+          "title": "Model",
+          "type": "string"
+        },
+        "abstained": {
+          "default": false,
+          "title": "Abstained",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "dimension",
+        "score",
+        "confidence",
+        "reason",
+        "rubric_version",
+        "model"
+      ],
+      "title": "DimensionScore",
+      "type": "object"
+    },
+    "GateStatus": {
+      "enum": [
+        "pass",
+        "fail"
+      ],
+      "title": "GateStatus",
+      "type": "string"
+    },
+    "GatesResult": {
+      "additionalProperties": false,
+      "description": "Hard gate evaluations performed before weighted scoring in M11.",
+      "properties": {
+        "evidence": {
+          "$ref": "#/$defs/GateStatus"
+        },
+        "feasibility": {
+          "$ref": "#/$defs/GateStatus"
+        },
+        "risk": {
+          "$ref": "#/$defs/GateStatus"
+        },
+        "duplicate": {
+          "$ref": "#/$defs/GateStatus"
+        },
+        "failure_reasons": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Failure Reasons",
+          "type": "object"
+        }
+      },
+      "required": [
+        "evidence",
+        "feasibility",
+        "risk",
+        "duplicate"
+      ],
+      "title": "GatesResult",
+      "type": "object"
+    },
+    "SensitivityResult": {
+      "additionalProperties": false,
+      "description": "Summary of weight +/-20% and least-confident score +/-1 perturbations.",
+      "properties": {
+        "runs": {
+          "minimum": 0,
+          "title": "Runs",
+          "type": "integer"
+        },
+        "flipped": {
+          "minimum": 0,
+          "title": "Flipped",
+          "type": "integer"
+        },
+        "flip_triggers": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Flip Triggers",
+          "type": "array"
+        }
+      },
+      "required": [
+        "runs",
+        "flipped"
+      ],
+      "title": "SensitivityResult",
+      "type": "object"
+    },
+    "StabilityLabel": {
+      "enum": [
+        "STABLE",
+        "BORDERLINE"
+      ],
+      "title": "StabilityLabel",
+      "type": "string"
+    },
+    "VerdictLabel": {
+      "enum": [
+        "GO",
+        "PIVOT",
+        "NO-GO",
+        "INSUFFICIENT_EVIDENCE"
+      ],
+      "title": "VerdictLabel",
+      "type": "string"
+    },
+    "VerdictVersions": {
+      "additionalProperties": false,
+      "description": "Version stamp recorded on every verdict for reproducibility and cache keys.",
+      "properties": {
+        "engine": {
+          "title": "Engine",
+          "type": "string"
+        },
+        "rubrics": {
+          "title": "Rubrics",
+          "type": "string"
+        },
+        "profile_weights": {
+          "title": "Profile Weights",
+          "type": "string"
+        }
+      },
+      "required": [
+        "engine",
+        "rubrics",
+        "profile_weights"
+      ],
+      "title": "VerdictVersions",
+      "type": "object"
+    },
+    "WhatIfSuggestion": {
+      "additionalProperties": false,
+      "description": "Smallest proposed change that changes a verdict toward GO.",
+      "properties": {
+        "change": {
+          "title": "Change",
+          "type": "string"
+        },
+        "dimension": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DimensionName"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "target_score": {
+          "anyOf": [
+            {
+              "maximum": 5.0,
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Score"
+        },
+        "new_score": {
+          "maximum": 100.0,
+          "minimum": 0.0,
+          "title": "New Score",
+          "type": "number"
+        },
+        "new_verdict": {
+          "$ref": "#/$defs/VerdictLabel"
+        }
+      },
+      "required": [
+        "change",
+        "new_score",
+        "new_verdict"
+      ],
+      "title": "WhatIfSuggestion",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Deterministic verdict output from M11.",
+  "properties": {
+    "idea_id": {
+      "minLength": 1,
+      "title": "Idea Id",
+      "type": "string"
+    },
+    "version": {
+      "minimum": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "run_id": {
+      "minLength": 1,
+      "title": "Run Id",
+      "type": "string"
+    },
+    "verdict": {
+      "$ref": "#/$defs/VerdictLabel"
+    },
+    "stability": {
+      "$ref": "#/$defs/StabilityLabel"
+    },
+    "score": {
+      "maximum": 100.0,
+      "minimum": 0.0,
+      "title": "Score",
+      "type": "number"
+    },
+    "confidence": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "gates": {
+      "$ref": "#/$defs/GatesResult"
+    },
+    "weights": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "propertyNames": {
+        "$ref": "#/$defs/DimensionName"
+      },
+      "title": "Weights",
+      "type": "object"
+    },
+    "thresholds": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "title": "Thresholds",
+      "type": "object"
+    },
+    "scores": {
+      "items": {
+        "$ref": "#/$defs/DimensionScore"
+      },
+      "title": "Scores",
+      "type": "array"
+    },
+    "weakest_dimension": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DimensionName"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "what_would_make_go": {
+      "items": {
+        "$ref": "#/$defs/WhatIfSuggestion"
+      },
+      "title": "What Would Make Go",
+      "type": "array"
+    },
+    "sensitivity": {
+      "$ref": "#/$defs/SensitivityResult"
+    },
+    "versions": {
+      "$ref": "#/$defs/VerdictVersions"
+    },
+    "insufficient_reasons": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Insufficient Reasons",
+      "type": "array"
+    }
+  },
+  "required": [
+    "idea_id",
+    "version",
+    "run_id",
+    "verdict",
+    "stability",
+    "score",
+    "confidence",
+    "gates",
+    "weights",
+    "thresholds",
+    "scores",
+    "sensitivity",
+    "versions"
+  ],
+  "title": "Verdict",
+  "type": "object"
+}

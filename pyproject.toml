@@ -1,0 +1,23 @@
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["shared", "services", "jobs", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["shared", "services"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+mypy_path = "."
+packages = ["shared", "services"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests", "services"]
+addopts = "-q --import-mode=importlib"

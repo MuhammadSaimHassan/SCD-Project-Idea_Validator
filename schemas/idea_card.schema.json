@@ -1,0 +1,113 @@
+{
+  "additionalProperties": false,
+  "description": "Normalized startup/product idea card stored in M6.",
+  "properties": {
+    "id": {
+      "minLength": 1,
+      "title": "Id",
+      "type": "string"
+    },
+    "name": {
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "summary": {
+      "title": "Summary",
+      "type": "string"
+    },
+    "problem": {
+      "title": "Problem",
+      "type": "string"
+    },
+    "customer": {
+      "title": "Customer",
+      "type": "string"
+    },
+    "niche_tags": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Niche Tags",
+      "type": "array"
+    },
+    "stage": {
+      "default": "unknown",
+      "title": "Stage",
+      "type": "string"
+    },
+    "funding_usd": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Funding Usd"
+    },
+    "source": {
+      "minLength": 1,
+      "title": "Source",
+      "type": "string"
+    },
+    "url": {
+      "minLength": 1,
+      "title": "Url",
+      "type": "string"
+    },
+    "published_at": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Published At"
+    },
+    "fetched_at": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "string"
+        }
+      ],
+      "title": "Fetched At"
+    },
+    "text": {
+      "minLength": 1,
+      "title": "Text",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "summary",
+    "problem",
+    "customer",
+    "source",
+    "url",
+    "fetched_at",
+    "text"
+  ],
+  "title": "IdeaCard",
+  "type": "object"
+}

@@ -1,0 +1,11 @@
+version: b1
+
+per_run:
+  max_tokens: 40000
+  max_pages_fetched: 25
+  max_steps: 40
+  max_cost_usd: 0.25
+  require_approval_over_usd: 0.10
+  max_debate_rounds: 3
+  max_agent_retries: 1
+  agent_timeout_seconds: 30

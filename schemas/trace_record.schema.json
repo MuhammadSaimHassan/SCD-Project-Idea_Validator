@@ -1,0 +1,148 @@
+{
+  "$defs": {
+    "TraceKind": {
+      "enum": [
+        "tool_call",
+        "llm_call",
+        "decision"
+      ],
+      "title": "TraceKind",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "AgenticOps trace record written to M13 for every step.",
+  "properties": {
+    "run_id": {
+      "minLength": 1,
+      "title": "Run Id",
+      "type": "string"
+    },
+    "step_id": {
+      "minimum": 1,
+      "title": "Step Id",
+      "type": "integer"
+    },
+    "parent_step": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Parent Step"
+    },
+    "agent": {
+      "minLength": 1,
+      "title": "Agent",
+      "type": "string"
+    },
+    "kind": {
+      "$ref": "#/$defs/TraceKind"
+    },
+    "tool": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Tool"
+    },
+    "input": {
+      "default": null,
+      "title": "Input"
+    },
+    "output": {
+      "default": null,
+      "title": "Output"
+    },
+    "tokens_in": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Tokens In",
+      "type": "integer"
+    },
+    "tokens_out": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Tokens Out",
+      "type": "integer"
+    },
+    "cost_usd": {
+      "default": 0.0,
+      "minimum": 0.0,
+      "title": "Cost Usd",
+      "type": "number"
+    },
+    "latency_ms": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Latency Ms",
+      "type": "integer"
+    },
+    "retries": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Retries",
+      "type": "integer"
+    },
+    "model": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Model"
+    },
+    "cache_hit": {
+      "default": false,
+      "title": "Cache Hit",
+      "type": "boolean"
+    },
+    "error": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error"
+    },
+    "ts": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "string"
+        }
+      ],
+      "title": "Ts"
+    }
+  },
+  "required": [
+    "run_id",
+    "step_id",
+    "agent",
+    "kind",
+    "ts"
+  ],
+  "title": "TraceRecord",
+  "type": "object"
+}
