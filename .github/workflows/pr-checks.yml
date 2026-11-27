@@ -22,3 +22,24 @@ jobs:
         run: mypy shared services
       - name: Run unit tests
         run: pytest
+
+  ui-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/ui
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: services/ui/package-lock.json
+      - name: Install UI dependencies
+        run: npm ci
+      - name: Typecheck UI
+        run: npm run typecheck
+      - name: Run UI component tests
+        run: npm test
+      - name: Build UI bundle
+        run: npm run build
