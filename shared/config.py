@@ -1,4 +1,4 @@
-"""Shared YAML config loader for weights, thresholds, and budgets."""
+"""Shared YAML config loader for weights, thresholds, budgets, and rubrics."""
 
 from pathlib import Path
 from typing import Any
@@ -15,9 +15,12 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return data
 
 
-def load_weights(config_dir: Path) -> dict[GoalType, dict[DimensionName, float]]:
-    """Load goal weight presets and verify each preset sums to 100."""
+def load_weights_config(
+    config_dir: Path,
+) -> tuple[str, dict[GoalType, dict[DimensionName, float]]]:
+    """Load weights version and goal presets, verifying each preset sums to 100."""
     raw = _load_yaml(config_dir / "weights.yaml")
+    version = str(raw.get("version", "w1"))
     goals_raw = raw.get("goals", {})
     parsed: dict[GoalType, dict[DimensionName, float]] = {}
     for goal in GoalType:
@@ -29,6 +32,12 @@ def load_weights(config_dir: Path) -> dict[GoalType, dict[DimensionName, float]]
         if abs(total - 100.0) > 1e-6:
             raise ValueError(f"Weights for {goal.value} must sum to 100, got {total}")
         parsed[goal] = dim_weights
+    return version, parsed
+
+
+def load_weights(config_dir: Path) -> dict[GoalType, dict[DimensionName, float]]:
+    """Load goal weight presets and verify each preset sums to 100."""
+    _, parsed = load_weights_config(config_dir)
     return parsed
 
 
@@ -40,3 +49,14 @@ def load_thresholds(config_dir: Path) -> dict[str, Any]:
 def load_budgets(config_dir: Path) -> dict[str, Any]:
     """Load AgenticOps per-run budget caps."""
     return _load_yaml(config_dir / "budgets.yaml")
+
+
+def load_rubrics(rubrics_dir: Path) -> dict[DimensionName, dict[str, Any]]:
+    """Load all six versioned dimension rubric YAML files."""
+    rubrics: dict[DimensionName, dict[str, Any]] = {}
+    for dim in DimensionName:
+        path = rubrics_dir / f"{dim.value}.yaml"
+        if not path.exists():
+            raise FileNotFoundError(f"Missing rubric file: {path}")
+        rubrics[dim] = _load_yaml(path)
+    return rubrics
