@@ -1,0 +1,65 @@
+dimension: risk
+version: 1
+rubric_version: risk@v1
+scale: 0-5
+description: Higher is better for the student (5 = no legal, privacy, safety, or platform-dependency concerns).
+anchors:
+  5: "Public official APIs only, no PII, no regulated domain, and no single-platform lock-in."
+  4: "Minor API rate-limit or Terms-of-Service constraints easily mitigated with caching."
+  3: "Moderate platform dependency (e.g., relies on one third-party API pricing tier) or light user-data handling."
+  2: "Scraping grey areas, fragile unofficial APIs, or sensitive personal data requiring strict compliance."
+  1: "High regulatory/privacy exposure (medical, financial advice, minors' data) or TOS violation risk."
+  0: "Severe legal, safety, or security blocker (unauthorized scraping, copyright/IP infringement, harmful output)."
+features:
+  - uses_official_apis_only
+  - handles_pii
+  - regulated_domain
+  - single_platform_dependency
+output_schema:
+  - score
+  - confidence
+  - evidence_ids
+  - reason
+examples:
+  - level: 5
+    input: "Uses official HN Firebase and GitHub REST APIs; stores only public posts."
+    expected:
+      score: 5.0
+      confidence: 0.9
+      evidence_ids: ["card_501#c0"]
+      reason: "Zero PII and official public APIs."
+  - level: 4
+    input: "Relies on GitHub REST rate limits, mitigated by local snapshot caching."
+    expected:
+      score: 4.0
+      confidence: 0.85
+      evidence_ids: ["card_510#c0"]
+      reason: "Low operational risk with snapshot fallback."
+  - level: 3
+    input: "Core workflow depends on Notion API schema stability and hosted LLM quota."
+    expected:
+      score: 3.0
+      confidence: 0.75
+      evidence_ids: ["card_520#c0"]
+      reason: "Moderate vendor dependency risk."
+  - level: 2
+    input: "Collects student resumes containing PII and requires HTML scraping of job boards."
+    expected:
+      score: 2.0
+      confidence: 0.8
+      evidence_ids: ["card_530#c0"]
+      reason: "PII storage and brittle scraping increase compliance risk."
+  - level: 1
+    input: "Automated medical triage suggestions without clinical validation."
+    expected:
+      score: 1.0
+      confidence: 0.9
+      evidence_ids: ["card_540#c0"]
+      reason: "High safety and regulatory liability."
+  - level: 0
+    input: "Bypasses paywalls and anti-bot captchas against explicit robots.txt disallow."
+    expected:
+      score: 0.0
+      confidence: 0.95
+      evidence_ids: ["card_550#c0"]
+      reason: "Clear terms-of-service and legal blocker."

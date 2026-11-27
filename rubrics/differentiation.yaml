@@ -1,0 +1,64 @@
+dimension: differentiation
+version: 1
+rubric_version: differentiation@v1
+scale: 0-5
+description: Higher is better for the student (5 = clear, defensible gap that existing products do not address).
+anchors:
+  5: "Solves a documented, high-friction gap that all cited competitors explicitly lack."
+  4: "Strong architectural or workflow wedge (e.g., local-first, 10x simpler setup) backed by user complaints."
+  3: "Clear feature or segment differentiation over existing products (threshold to pass duplicate check)."
+  2: "Incremental UX polish or minor bundling over existing tools."
+  1: "Mostly a UI reskin or thin wrapper around an existing product."
+  0: "Identical core features for the exact same user as an existing product."
+features:
+  - gap_count
+  - max_similarity_to_existing
+  - missing_feature_mentions
+output_schema:
+  - score
+  - confidence
+  - evidence_ids
+  - reason
+examples:
+  - level: 5
+    input: "Competitors require cloud upload; 5 complaints demand offline local-only compliance mode."
+    expected:
+      score: 5.0
+      confidence: 0.85
+      evidence_ids: ["card_301#c1", "card_302#c0"]
+      reason: "Addresses a strict offline requirement absent from every competitor."
+  - level: 4
+    input: "Adds deterministic rule verification on top of LLM scoring where competitors only prompt."
+    expected:
+      score: 4.0
+      confidence: 0.8
+      evidence_ids: ["card_310#c0"]
+      reason: "Clear structural wedge grounded in judge drift complaints."
+  - level: 3
+    input: "Focuses specifically on university lab budgets and Python-only workflows unlike generic BI suites."
+    expected:
+      score: 3.0
+      confidence: 0.75
+      evidence_ids: ["card_320#c2"]
+      reason: "Distinct target workflow and pricing tier."
+  - level: 2
+    input: "Same feature set as ExampleApp with cleaner dark-mode dashboards."
+    expected:
+      score: 2.0
+      confidence: 0.75
+      evidence_ids: ["card_330#c0"]
+      reason: "Only cosmetic UX improvements over existing tool."
+  - level: 1
+    input: "Thin ChatGPT prompt wrapper duplicating 3 Product Hunt launches."
+    expected:
+      score: 1.0
+      confidence: 0.85
+      evidence_ids: ["card_340#c0"]
+      reason: "Minimal differentiation beyond prompt packaging."
+  - level: 0
+    input: "Exact clone of existing open-source tool with renamed branding."
+    expected:
+      score: 0.0
+      confidence: 0.9
+      evidence_ids: ["card_350#c0"]
+      reason: "Identical core features for the same user."
