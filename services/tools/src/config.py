@@ -27,6 +27,8 @@ class ToolsSettings(BaseSettings):
     cache_ttl_seconds: int = 3600
     request_timeout_seconds: float = 15.0
     max_retries: int = 2
+    max_pages_per_run: int = 25
+    agentops_url: str = ""
     github_token: str = ""
     respect_robots_txt: bool = True
 

@@ -29,4 +29,12 @@ All payloads are validated against `shared/schemas/` (`schemas/*.schema.json`).
 | M10 Scoring Model | `POST /score` | `ScoreRequest` | `DimensionScore` |
 | M11 Verdict Engine | `POST /verdict`, `POST /whatif` | `VerdictRequest`, `WhatIfRequest` | `Verdict` |
 | M12 Critic | `POST /check` | `CheckRequest` | `CheckResponse` |
-| M13 AgenticOps | `POST /trace`, `GET /runs/{id}/trace` | `TraceRecord` | `list[TraceRecord]` |
+| M13 AgenticOps | `POST /trace`, `GET /runs/{id}/trace`, `POST /runs/{id}/replay` | `TraceRecord` | persisted/replayed trace records |
+| M13 AgenticOps | `GET /metrics`, `GET /dashboard`, `GET /dashboard/data`, `GET /registry` | — | metrics, dashboard, prompt/rubric versions |
+
+M13 stores append-only JSONL traces under `AGENTOPS_TRACE_DIR` (default
+`data/traces`). Replay uses recorded tool results and makes no external calls.
+The evaluation/tuning command is `python -m eval.verdict.cli`; it requires a
+human-labelled dataset described in `eval/verdict/README.md`.
+Set `AGENTOPS_URL` on M1, M5, and M12 to emit workflow, page-budget, and critic
+events to M13. M5 enforces `MAX_PAGES_PER_RUN` for requests carrying a run ID.

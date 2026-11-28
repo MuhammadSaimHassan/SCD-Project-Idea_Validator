@@ -5,6 +5,8 @@ import json
 import sys
 from pathlib import Path
 
+from services.agentops.src.drift import build_drift_report
+from services.analyst.src.analyzer import load_cards
 from services.scouts.src.config import settings as scout_settings
 from services.scouts.src.connectors import HttpToolsClient, ToolsClient, run_scouts
 from services.tools.src.config import ToolsSettings
@@ -38,9 +40,16 @@ def main(argv: list[str] | None = None) -> int:
         default="",
         help="Load existing snapshot JSONL instead of calling scouts",
     )
+    parser.add_argument(
+        "--drift-report",
+        default="eval/results/drift_report.json",
+        help="Output path for the post-ingestion drift report",
+    )
     args = parser.parse_args(argv)
 
-    store = IngestionStore(Path(args.db), Path(args.snapshot))
+    snapshot_path = Path(args.snapshot)
+    previous_cards = load_cards(snapshot_path) if snapshot_path.exists() else []
+    store = IngestionStore(Path(args.db), snapshot_path)
     try:
         if args.from_snapshot:
             stats = store.load_snapshot(Path(args.from_snapshot))
@@ -53,6 +62,12 @@ def main(argv: list[str] | None = None) -> int:
     finally:
         store.close()
 
+    current_cards = load_cards(snapshot_path)
+    drift_report = build_drift_report(previous_cards, current_cards)
+    drift_path = Path(args.drift_report)
+    drift_path.parent.mkdir(parents=True, exist_ok=True)
+    drift_path.write_text(json.dumps(drift_report, indent=2) + "\n", encoding="utf-8")
+
     print(
         json.dumps(
             {
@@ -63,6 +78,7 @@ def main(argv: list[str] | None = None) -> int:
                 "counts_by_source": stats.counts_by_source,
                 "scout_errors": errors,
                 "snapshot": args.snapshot,
+                "drift_report": args.drift_report,
             },
             indent=2,
         )

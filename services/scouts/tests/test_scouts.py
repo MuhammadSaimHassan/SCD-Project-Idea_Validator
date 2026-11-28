@@ -16,9 +16,11 @@ class FakeToolsClient:
     def __init__(self, fail_source: str | None = None) -> None:
         self.fail_source = fail_source
         self.requested_urls: list[str] = []
+        self.run_ids: list[str | None] = []
 
     def fetch(self, req: FetchRequest) -> FetchResponse:
         self.requested_urls.append(req.url)
+        self.run_ids.append(req.run_id)
         if self.fail_source and req.source == self.fail_source:
             raise RuntimeError(f"Simulated upstream failure for {req.source}")
 
@@ -92,9 +94,7 @@ def test_scouts_never_call_external_urls_directly() -> None:
                 and node.value.id in {"httpx", "requests"}
                 and node.attr in {"get", "AsyncClient", "Client"}
             ):
-                raise AssertionError(
-                    f"Direct {node.value.id}.{node.attr} found in {path.name}"
-                )
+                raise AssertionError(f"Direct {node.value.id}.{node.attr} found in {path.name}")
 
 
 def test_run_scouts_isolates_failing_source() -> None:
@@ -104,3 +104,5 @@ def test_run_scouts_isolates_failing_source() -> None:
     assert len(items) == 2
     assert {item.source for item in items} == {"hackernews", "yc"}
     assert len(tools.requested_urls) >= 3
+    assert len(set(tools.run_ids)) == 1
+    assert tools.run_ids[0]

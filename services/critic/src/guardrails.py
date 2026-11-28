@@ -70,10 +70,7 @@ def check_claims(payload: CheckRequest) -> CheckResponse:
         cleaned_quote = " ".join(item.quote for item in matched)
         sanitised_quote, _ = sanitise_text(cleaned_quote)
         matched_quote_evidence = matched[0].model_copy(update={"quote": sanitised_quote})
-        overlap = max(
-            _evidence_overlap(cleaned_claim, matched_quote_evidence),
-            *(_evidence_overlap(cleaned_claim, item) for item in matched),
-        )
+        overlap = _evidence_overlap(cleaned_claim, matched_quote_evidence)
         supported = overlap >= 0.15
         results.append(
             CheckClaimResult(

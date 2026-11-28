@@ -100,6 +100,18 @@
       },
       "title": "Evidence",
       "type": "array"
+    },
+    "run_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Run Id"
     }
   },
   "required": [

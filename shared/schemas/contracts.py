@@ -125,6 +125,7 @@ class CheckRequest(BaseModel):
 
     claims: list[ClaimItem]
     evidence: list[EvidenceItem]
+    run_id: str | None = None
 
 
 class CheckClaimResult(BaseModel):

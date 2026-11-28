@@ -39,6 +39,8 @@ models/
 traces/*.jsonl
 eval/results/*.json
 !eval/results/.gitkeep
+!eval/results/verdict_tuning.json
+!eval/results/drift_report.json
 
 # OS & Editors
 .DS_Store

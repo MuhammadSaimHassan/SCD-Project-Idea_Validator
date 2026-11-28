@@ -2,6 +2,7 @@
 
 import json
 import logging
+import uuid
 from dataclasses import dataclass
 from typing import Any, Protocol
 
@@ -15,8 +16,7 @@ logger = logging.getLogger("scouts")
 class ToolsClient(Protocol):
     """Protocol for M5 Tool Layer client."""
 
-    def fetch(self, req: FetchRequest) -> FetchResponse:
-        ...
+    def fetch(self, req: FetchRequest) -> FetchResponse: ...
 
 
 class HttpToolsClient:
@@ -53,7 +53,9 @@ class RawScoutItem:
     text: str
 
 
-def scout_hackernews(tools: ToolsClient, limit: int = 500) -> list[RawScoutItem]:
+def scout_hackernews(
+    tools: ToolsClient, limit: int = 500, run_id: str | None = None
+) -> list[RawScoutItem]:
     """Fetch Show HN / Ask HN / startup pain posts via Algolia HN API through M5."""
     items: list[RawScoutItem] = []
     queries = ["Show HN", "Ask HN", "pain point", "developer tool", "automation"]
@@ -74,6 +76,7 @@ def scout_hackernews(tools: ToolsClient, limit: int = 500) -> list[RawScoutItem]
                         "hitsPerPage": per_page,
                         "page": page,
                     },
+                    run_id=run_id,
                 )
             )
             data = json.loads(resp.content)
@@ -82,10 +85,7 @@ def scout_hackernews(tools: ToolsClient, limit: int = 500) -> list[RawScoutItem]
                 break
             for hit in hits:
                 object_id = str(hit.get("objectID", ""))
-                url = str(
-                    hit.get("url")
-                    or f"https://news.ycombinator.com/item?id={object_id}"
-                )
+                url = str(hit.get("url") or f"https://news.ycombinator.com/item?id={object_id}")
                 if url in seen_urls:
                     continue
                 seen_urls.add(url)
@@ -113,7 +113,9 @@ def scout_hackernews(tools: ToolsClient, limit: int = 500) -> list[RawScoutItem]
     return items
 
 
-def scout_github(tools: ToolsClient, limit: int = 500) -> list[RawScoutItem]:
+def scout_github(
+    tools: ToolsClient, limit: int = 500, run_id: str | None = None
+) -> list[RawScoutItem]:
     """Fetch public developer/product repositories via GitHub REST API through M5."""
     items: list[RawScoutItem] = []
     topics = [
@@ -135,6 +137,7 @@ def scout_github(tools: ToolsClient, limit: int = 500) -> list[RawScoutItem]:
                     source="github",
                     url="https://api.github.com/search/repositories",
                     params={"q": q, "sort": "stars", "per_page": 100, "page": page},
+                    run_id=run_id,
                 )
             )
             data = json.loads(resp.content)
@@ -172,12 +175,13 @@ def scout_github(tools: ToolsClient, limit: int = 500) -> list[RawScoutItem]:
     return items
 
 
-def scout_yc(tools: ToolsClient, limit: int = 550) -> list[RawScoutItem]:
+def scout_yc(tools: ToolsClient, limit: int = 550, run_id: str | None = None) -> list[RawScoutItem]:
     """Fetch public YC directory company cards via M5."""
     resp = tools.fetch(
         FetchRequest(
             source="yc",
             url="https://yc-oss.github.io/api/companies/all.json",
+            run_id=run_id,
         )
     )
     companies = json.loads(resp.content)
@@ -218,7 +222,9 @@ def scout_yc(tools: ToolsClient, limit: int = 550) -> list[RawScoutItem]:
     return items
 
 
-def scout_reddit(tools: ToolsClient, limit: int = 200) -> list[RawScoutItem]:
+def scout_reddit(
+    tools: ToolsClient, limit: int = 200, run_id: str | None = None
+) -> list[RawScoutItem]:
     """Fetch public startup/side-project discussions via Reddit JSON API through M5."""
     items: list[RawScoutItem] = []
     subreddits = ["SideProject", "SaaS", "startups"]
@@ -230,6 +236,7 @@ def scout_reddit(tools: ToolsClient, limit: int = 200) -> list[RawScoutItem]:
                 source="reddit",
                 url=f"https://www.reddit.com/r/{sub}/top.json",
                 params={"t": "month", "limit": 100},
+                run_id=run_id,
             )
         )
         data = json.loads(resp.content)
@@ -274,8 +281,10 @@ def run_scouts(
     sources: list[str],
     tools: ToolsClient,
     per_source_limit: int = 550,
+    run_id: str | None = None,
 ) -> tuple[list[RawScoutItem], dict[str, str]]:
     """Run scouts with per-source failure isolation."""
+    run_id = run_id or f"scout_{uuid.uuid4().hex[:12]}"
     collected: list[RawScoutItem] = []
     errors: dict[str, str] = {}
     for source in sources:
@@ -284,7 +293,7 @@ def run_scouts(
             errors[source] = f"Unknown scout source: {source}"
             continue
         try:
-            batch = fn(tools, limit=per_source_limit)
+            batch = fn(tools, limit=per_source_limit, run_id=run_id)
             collected.extend(batch)
             logger.info("scout=%s fetched=%d", source, len(batch))
         except Exception as exc:  # noqa: BLE001

@@ -26,9 +26,7 @@ def get_cache(request: Request) -> VersionedCache:
     return cache
 
 
-def get_auth_service(
-    request: Request, session: Session = Depends(get_db_session)
-) -> AuthService:
+def get_auth_service(request: Request, session: Session = Depends(get_db_session)) -> AuthService:
     settings = request.app.state.settings
     return AuthService(
         UserRepository(session),
@@ -75,4 +73,5 @@ def get_workflow_service(
         rubric_version=settings.rubric_version,
         verdict_url=settings.verdict_url,
         orchestrator_url=settings.orchestrator_url,
+        agentops_url=settings.agentops_url,
     )

@@ -276,12 +276,12 @@ Swap anything you like, but keep it balanced. The contribution table must show s
 
 **Module:** M13.
 
-- [ ] **Tracing:** every agent step, tool call and model call writes a trace record under one run id (`POST /trace`, `GET /runs/{id}/trace`, JSON lines on a volume). Build a **replay command** that re-runs a stored run using recorded tool results.
-- [ ] **Budgets:** caps on tokens, pages, steps and cost per run, enforced in the orchestrator and tool layer. Over budget means stop or ask the user.
-- [ ] **Prompt and rubric registry:** versioned files; every verdict records the engine, rubric and weight versions used.
-- [ ] **Evaluation harness:** runs the system on labelled ideas, outputs agreement and a confusion matrix, and checks behaviour (tools used, evidence cited, budget kept, injection resisted). It must run as a single command so it can become a Kubernetes Job and a nightly Jenkins stage.
-- [ ] **Drift reports** after each ingestion: data freshness, niche coverage, shift in the verdict distribution.
-- [ ] **Dashboard:** cost per verdict, latency per agent, cache hit rate, fallbacks, approvals, blocked injections (a Prometheus `/metrics` endpoint plus Grafana, or a simple page reading `/metrics`).
+- [x] **Tracing:** the M3 workflow, M1 workflow events, M5 page-budget stops, and M12 checks can write trace records under one run id (`POST /trace`, `GET /runs/{id}/trace`) as JSONL. Replay API/CLI reuses recorded tool results without external calls.
+- [x] **Budgets:** configured caps for tokens, pages, steps and cost are enforced by the M3 budget tracker; M5 enforces a per-run fetch-page cap. Downstream model/tool adapters must report actual usage through `record_usage`.
+- [x] **Prompt and rubric registry:** versioned prompt files and rubrics are listed by M13; M11 verdicts record engine, rubric and weight versions.
+- [ ] **Evaluation harness:** single command, `python -m eval.verdict.cli`, validates the labelled set, reports before/after confusion matrices, and checks tool traces, evidence citations, budgets, and injection handling. Run it after the required human labels are collected.
+- [x] **Drift reports** are generated after ingestion with freshness, source counts, and niche coverage; optional before/after Verdict JSONL exports add verdict-distribution drift. The report marks verdict drift unavailable when exports are absent.
+- [x] **Dashboard:** M13 exposes Prometheus `/metrics`, JSON `/dashboard/data`, and an HTML `/dashboard` for per-agent latency, cost per verdict, cache hits, fallbacks, approvals, budget stops, and blocked injections. Set `AGENTOPS_URL` on emitting services for live events.
 
 **Done when:** one run produces a readable trace, a replay works, and the dashboard shows real numbers.
 
@@ -305,8 +305,10 @@ Swap anything you like, but keep it balanced. The contribution table must show s
 - [ ] Tune T_go, T_no, floors and weights. Report separately how often the system says **GO when humans said NO-GO**, because that is the worst error.
 - [ ] Do not overfit. Check the tuned values on a few ideas you held back.
 - [ ] Save the final values in `config/` (they become the ConfigMap later). Build the **"after" confusion matrix**.
-- [ ] Write **decision records 2 and 3** (for example: "verdict by code, not by LLM", "fine-tuned scorer with hosted fallback", "NetworkPolicy with a single tool layer").
-- [ ] Finalise the AI-usage log up to this point.
+- [x] Write **decision records 2 and 3** (deterministic verdict engine; JSONL tracing and budget gates).
+- [x] Update the AI-usage log for this implementation phase.
+
+**Human-label prerequisite:** The harness and dataset format are ready in `eval/verdict/`, but no independently labelled ideas have been provided yet. Do not generate or report before/after matrices or change production thresholds until both members complete and adjudicate at least 25 cases, including a held-out split.
 
 **Done when:** before and after matrices exist, final config is saved.
 

@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+import pytest
 from alembic import command
 from alembic.config import Config
 from fastapi.testclient import TestClient
@@ -9,13 +10,12 @@ from sqlalchemy import create_engine, inspect
 
 from services.gateway.src.config import GatewaySettings
 from services.gateway.src.main import create_app
+from services.gateway.src.services import workflow_service as workflow_module
 
 ROOT = Path(__file__).resolve().parents[3]
 
 
-def _make_client(
-    tmp_path: Path, *, rate_limit: int = 120
-) -> TestClient:
+def _make_client(tmp_path: Path, *, rate_limit: int = 120, agentops_url: str = "") -> TestClient:
     db_file = tmp_path / "test_m2.db"
     cfg = GatewaySettings(
         database_url=f"sqlite:///{db_file.as_posix()}",
@@ -23,6 +23,7 @@ def _make_client(
         jwt_secret="test-secret-key",
         rate_limit_requests=rate_limit,
         rate_limit_window_seconds=60,
+        agentops_url=agentops_url,
         config_dir=ROOT / "config",
     )
     return TestClient(create_app(cfg))
@@ -52,9 +53,7 @@ def _auth_and_profile(client: TestClient, email: str = "student@nu.edu.pk") -> d
     return headers
 
 
-def test_alembic_migration_creates_all_m2_tables(
-    tmp_path: Path, monkeypatch: object
-) -> None:
+def test_alembic_migration_creates_all_m2_tables(tmp_path: Path, monkeypatch: object) -> None:
     db_path = tmp_path / "migrated.db"
     db_url = f"sqlite:///{db_path.as_posix()}"
     alembic_ini = ROOT / "services" / "gateway" / "alembic.ini"
@@ -260,3 +259,24 @@ def test_rate_limiting_blocks_excess_requests(tmp_path: Path) -> None:
     blocked = client.get("/auth/login")
     assert blocked.status_code == 429
     assert client.get("/metrics").json()["rate_limited_total"] == 1
+
+
+def test_gateway_emits_workflow_trace_records(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    emitted: list[tuple[str, object]] = []
+    monkeypatch.setattr(
+        workflow_module,
+        "emit_trace",
+        lambda url, record: emitted.append((url, record)),
+    )
+    client = _make_client(tmp_path, agentops_url="http://agentops")
+    headers = _auth_and_profile(client)
+    response = client.post(
+        "/validate",
+        headers=headers,
+        json={"title": "Student Planner", "idea_text": "A student study-planning tool."},
+    )
+    assert response.status_code == 202
+    assert len(emitted) == 2
+    assert all(url == "http://agentops" for url, _ in emitted)

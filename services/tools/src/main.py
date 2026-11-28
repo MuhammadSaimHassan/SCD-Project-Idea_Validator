@@ -6,7 +6,7 @@ from shared.schemas import FetchRequest, FetchResponse
 
 from .config import ToolsSettings
 from .config import settings as default_settings
-from .fetcher import ToolFetcher
+from .fetcher import RunPageBudgetExceeded, ToolFetcher
 from .guard import DomainNotAllowedError, DomainRateLimitError, RobotsDisallowedError
 
 
@@ -39,6 +39,7 @@ def create_app(custom_settings: ToolsSettings | None = None) -> FastAPI:
             "blocked_domains_total": f.blocked_domains,
             "blocked_robots_total": f.blocked_robots,
             "sanitized_injections_total": f.sanitized_total,
+            "run_page_budget_exceeded_total": f.budget_exceeded,
         }
 
     @app.post("/fetch", response_model=FetchResponse)
@@ -49,6 +50,10 @@ def create_app(custom_settings: ToolsSettings | None = None) -> FastAPI:
         except (DomainNotAllowedError, RobotsDisallowedError) as exc:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
         except DomainRateLimitError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=str(exc)
+            ) from exc
+        except RunPageBudgetExceeded as exc:
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=str(exc)
             ) from exc

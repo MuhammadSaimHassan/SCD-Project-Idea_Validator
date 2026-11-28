@@ -8,6 +8,7 @@ from typing import Any
 
 import httpx
 
+from services.agentops.src.client import emit_trace
 from services.gateway.src.repositories.cache import VersionedCache, verdict_cache_key
 from services.gateway.src.repositories.idea_repo import IdeaRepository
 from services.gateway.src.repositories.run_repo import RunRepository
@@ -32,6 +33,8 @@ from shared.schemas import (
     SensitivityResult,
     StabilityLabel,
     StudentProfile,
+    TraceKind,
+    TraceRecord,
     Verdict,
     VerdictLabel,
     VerdictRequest,
@@ -60,6 +63,7 @@ class WorkflowService:
         rubric_version: str,
         verdict_url: str = "",
         orchestrator_url: str = "",
+        agentops_url: str = "",
     ) -> None:
         self._users = user_repo
         self._ideas = idea_repo
@@ -69,6 +73,28 @@ class WorkflowService:
         self._rubric_version = rubric_version
         self._verdict_url = verdict_url.rstrip("/")
         self._orchestrator_url = orchestrator_url.rstrip("/")
+        self._agentops_url = agentops_url.rstrip("/")
+
+    def _emit_trace_events(self, run_id: str, events: list[dict[str, Any]]) -> None:
+        for event in events:
+            tool = str(event.get("tool", ""))
+            kind = (
+                TraceKind.DECISION if tool in {"approval", "user_answer"} else TraceKind.TOOL_CALL
+            )
+            emit_trace(
+                self._agentops_url,
+                TraceRecord(
+                    run_id=run_id,
+                    step_id=int(event["step"]),
+                    agent=str(event["agent"]),
+                    kind=kind,
+                    tool=tool or None,
+                    input={"message": str(event.get("message", ""))},
+                    output=event,
+                    cache_hit=bool(event.get("cache_hit", False)),
+                    ts=str(event["ts"]),
+                ),
+            )
 
     def _require_profile(self, user_id: str) -> StudentProfile:
         profile = self._users.get_profile(user_id)
@@ -328,6 +354,7 @@ class WorkflowService:
                     "message": "Deep scout across 30 external pages costs ~$0.12. Approve?",
                 },
             )
+            self._emit_trace_events(run_id, events)
             return self._to_run_response(row)
 
         return self._finish_discover_run(run_id, user_id, profile, payload, [])
@@ -412,6 +439,7 @@ class WorkflowService:
             clear_approval=True,
             result={"ideas": ranked_cards},
         )
+        self._emit_trace_events(run_id, events[len(prior_events) :])
         return self._to_run_response(row)
 
     def start_validate(self, user_id: str, payload: ValidateRunRequest) -> RunStatusResponse:
@@ -442,6 +470,7 @@ class WorkflowService:
                     "field": "target_segment",
                 },
             )
+            self._emit_trace_events(run_id, json.loads(row.events_json))
             return self._to_run_response(row)
 
         if payload.require_deep_search_approval:
@@ -464,6 +493,7 @@ class WorkflowService:
                     "message": "Approve extra external scouting for ~$0.11?",
                 },
             )
+            self._emit_trace_events(run_id, json.loads(row.events_json))
             return self._to_run_response(row)
 
         return self._finish_validate_run(run_id, user_id, profile, payload, [])
@@ -547,6 +577,7 @@ class WorkflowService:
             clear_approval=True,
             result={"verdict": verdict.model_dump(mode="json"), "cache_hit": cache_hit},
         )
+        self._emit_trace_events(run_id, events[len(prior_events) :])
         return self._to_run_response(row)
 
     def get_run(self, user_id: str, run_id: str) -> RunStatusResponse:
@@ -578,6 +609,7 @@ class WorkflowService:
                 "ts": _now_iso(),
             }
         )
+        self._emit_trace_events(run_id, [events[-1]])
         return self._finish_validate_run(
             run_id, user_id, profile, ValidateRunRequest.model_validate(req_data), events
         )
@@ -604,6 +636,7 @@ class WorkflowService:
                 "ts": _now_iso(),
             }
         )
+        self._emit_trace_events(run_id, [events[-1]])
         if not payload.approved:
             updated = self._runs.update_run(
                 run_id,

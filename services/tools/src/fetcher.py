@@ -1,12 +1,14 @@
 """Controlled HTTP fetcher for M5 Tool Layer."""
 
+import threading
 import time
 from datetime import UTC, datetime
 from urllib.parse import urlencode, urlparse
 
 import httpx
 
-from shared.schemas import FetchRequest, FetchResponse
+from services.agentops.src.client import emit_trace
+from shared.schemas import FetchRequest, FetchResponse, TraceKind, TraceRecord
 
 from .config import ToolsSettings
 from .guard import (
@@ -16,6 +18,10 @@ from .guard import (
     RobotsDisallowedError,
 )
 from .sanitiser import sanitise_text
+
+
+class RunPageBudgetExceeded(RuntimeError):
+    """Raised when a run reaches the configured M5 fetch-page limit."""
 
 
 class ToolFetcher:
@@ -39,6 +45,36 @@ class ToolFetcher:
         self.blocked_domains = 0
         self.blocked_robots = 0
         self.sanitized_total = 0
+        self.budget_exceeded = 0
+        self._pages_by_run: dict[str, int] = {}
+        self._budget_lock = threading.Lock()
+
+    def _reserve_page(self, run_id: str | None) -> None:
+        if run_id is None:
+            return
+        with self._budget_lock:
+            used = self._pages_by_run.get(run_id, 0)
+            if used >= self._settings.max_pages_per_run:
+                self.budget_exceeded += 1
+                error = (
+                    f"Run budget exceeded: {run_id} reached the "
+                    f"{self._settings.max_pages_per_run}-page fetch cap"
+                )
+                emit_trace(
+                    self._settings.agentops_url,
+                    TraceRecord(
+                        run_id=run_id,
+                        step_id=used + 1,
+                        agent="tools",
+                        kind=TraceKind.DECISION,
+                        tool="page_budget",
+                        output={"blocked": True},
+                        error=error,
+                        ts=datetime.now(UTC),
+                    ),
+                )
+                raise RunPageBudgetExceeded(error)
+            self._pages_by_run[run_id] = used + 1
 
     def _canonical_url(self, req: FetchRequest) -> str:
         if not req.params:
@@ -62,6 +98,7 @@ class ToolFetcher:
                 return response.model_copy(update={"cache_hit": True})
             del self._cache[full_url]
 
+        self._reserve_page(req.run_id)
         if self._settings.respect_robots_txt and not self._robots.is_allowed(
             full_url, self._client
         ):

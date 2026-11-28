@@ -41,3 +41,20 @@ An interactive multi-agent system that helps students **discover** project/start
    mypy shared services
    pytest
    ```
+
+## AgenticOps and Verdict Evaluation
+
+- Run the local AgenticOps API with
+  `uvicorn services.agentops.src.main:app --host 0.0.0.0 --port 8013`.
+- Replay a persisted run with
+  `python -m services.agentops.src.cli replay <run_id>`. The replay reuses recorded
+  tool outputs and reruns the deterministic M11 verdict from its captured request
+  and config; it makes no external calls.
+- Generate a knowledge-base drift report after ingestion automatically, or run
+  `python -m services.agentops.src.drift_cli --previous <old-cards.jsonl> --current <cards.jsonl>`.
+  To include verdict-distribution drift, also pass `--previous-verdicts` and
+  `--current-verdicts` with JSONL `Verdict` exports.
+- Review `eval/verdict/README.md` and add independently labelled, adjudicated
+  cases before running `python -m eval.verdict.cli`. The harness refuses to
+  fabricate labels and checks the held-out split before it can update verdict
+  configuration.
