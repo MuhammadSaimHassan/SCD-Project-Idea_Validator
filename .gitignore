@@ -27,7 +27,7 @@ services/ui/dist/
 services/ui/.vite/
 
 # Data, Models, Volumes & Artifacts
-data/
+/data/
 models/
 *.gguf
 *.bin
