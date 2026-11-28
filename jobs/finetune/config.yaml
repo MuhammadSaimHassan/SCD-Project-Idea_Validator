@@ -1,0 +1,26 @@
+base_model: Qwen/Qwen2.5-1.5B-Instruct
+lora:
+  r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+training:
+  learning_rate: 0.0002
+  num_train_epochs: 3
+  per_device_train_batch_size: 4
+  gradient_accumulation_steps: 4
+  max_seq_length: 1024
+  warmup_ratio: 0.05
+  eval_strategy: epoch
+  quantization: 4bit-nf4
+export:
+  gguf_quant_type: Q4_K_M
+  merged_dir: artifacts/merged-scorer-1.5b
+  gguf_file: artifacts/scorer-1.5b-q4_k_m.gguf
