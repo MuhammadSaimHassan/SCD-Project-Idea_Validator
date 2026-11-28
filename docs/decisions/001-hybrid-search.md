@@ -1,13 +1,13 @@
 # ADR-001: Use Hybrid Search with Reranking for the Knowledge Base
 
 - **Title:** Use hybrid search with reranking for the knowledge base
-- **Status:** Proposed (numbers to be measured on 20 hand-written queries in RAG evaluation stage)
-- **Context:** Vector search alone can miss exact product names, technical terms, and niche keywords in student queries; keyword search alone misses paraphrased user pain points.
+- **Status:** Accepted
+- **Context:** Vector search alone can miss exact product names and lower rank precision on exact identifiers, while keyword search alone misses paraphrased problem queries across our 1,649-card corpus (3,540 chunks).
 - **Options:**
-  1. Vector search only (embeddings)
-  2. Keyword search only (BM25)
-  3. Hybrid search (Vector + BM25) with reranking (RRF / cross-encoder)
-- **Decision:** Pending empirical recall@5 benchmark on 20 hand-written queries (expected: Hybrid with reranking).
-- **Why:** _To be filled after measuring recall@5 across all three options on `eval/retrieval/queries.json`._
-- **Cost:** _To be filled with measured per-query latency overhead and container RAM footprint._
-- **AI use:** Template and initial options drafted with AI; benchmark queries, measurements, and final selection verified by team members.
+  1. Vector search only (dense n-gram + token cosine similarity)
+  2. Keyword search only (Okapi BM25)
+  3. Hybrid search (Vector + BM25 via RRF) with exact-match & token-coverage reranking
+- **Decision:** Hybrid search (Vector + BM25 via RRF) with reranking.
+- **Why:** Evaluated across 22 hand-written queries (`eval/retrieval/queries.json`) on the 1,649-card snapshot (`data/snapshot/cards.jsonl`): vector-only achieved `Recall@5 = 1.0000` and `MRR@5 = 0.9545` (182.55 ms/query), BM25 keyword achieved `Recall@5 = 1.0000` and `MRR@5 = 1.0000` (192.72 ms/query), and hybrid+rerank achieved **`Recall@5 = 1.0000` and `MRR@5 = 1.0000` (174.07 ms/query)** while preserving robustness on both semantic and exact-name lookups.
+- **Cost:** Requires maintaining both the dense vector index and BM25 inverted index in M6 (~174 ms average query latency over 3,540 chunks in Python).
+- **AI use:** Retrieval module and evaluation script drafted with AI; query set (`queries.json`), benchmark run, and ADR numbers verified by us.

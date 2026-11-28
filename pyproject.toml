@@ -19,5 +19,5 @@ packages = ["shared", "services", "jobs"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
-testpaths = ["tests", "services", "jobs"]
+testpaths = ["tests", "services", "jobs", "eval"]
 addopts = "-q --import-mode=importlib"
