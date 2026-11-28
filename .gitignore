@@ -25,6 +25,7 @@ kubeconfig*
 node_modules/
 services/ui/dist/
 services/ui/.vite/
+*.tsbuildinfo
 
 # Data, Models, Volumes & Artifacts
 /data/
