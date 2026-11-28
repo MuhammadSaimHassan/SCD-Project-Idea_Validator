@@ -1,0 +1,64 @@
+dimension: learning
+version: 1
+rubric_version: learning@v1
+scale: 0-5
+description: Higher is better for the student (5 = strongly teaches desired skills and stands out on a CV/portfolio).
+anchors:
+  5: "Directly exercises target skills/interests in a realistic end-to-end architecture with strong CV/demo value."
+  4: "Teaches 2+ valuable engineering skills aligned with student goals and produces a solid portfolio artifact."
+  3: "Good practice on familiar technologies with modest new learning."
+  2: "Mostly repetitive CRUD work with little alignment to student's stated interests."
+  1: "Trivial tutorial-level project with minimal portfolio differentiation."
+  0: "Teaches none of the desired skills and adds no portfolio or course value."
+features:
+  - interest_overlap_count
+  - new_skills_count
+  - goal_alignment
+output_schema:
+  - score
+  - confidence
+  - evidence_ids
+  - reason
+examples:
+  - level: 5
+    input: "Portfolio goal; student wants ML/K8s/FastAPI; project includes RAG, LoRA fine-tuning, CI/CD, and K8s."
+    expected:
+      score: 5.0
+      confidence: 0.9
+      evidence_ids: ["card_601#c0"]
+      reason: "High CV signal across AI engineering and platform deployment."
+  - level: 4
+    input: "Course project building a hybrid search engine with evaluation metrics."
+    expected:
+      score: 4.0
+      confidence: 0.85
+      evidence_ids: ["card_610#c0"]
+      reason: "Strong engineering depth aligned with coursework."
+  - level: 3
+    input: "Standard React + Postgres web app matching existing skills."
+    expected:
+      score: 3.0
+      confidence: 0.8
+      evidence_ids: ["card_620#c0"]
+      reason: "Solid execution practice but limited new technical stretch."
+  - level: 2
+    input: "Simple static landing page builder when student wants backend distributed systems."
+    expected:
+      score: 2.0
+      confidence: 0.75
+      evidence_ids: ["card_630#c0"]
+      reason: "Weak alignment with target backend learning goals."
+  - level: 1
+    input: "Basic to-do list clone with no evaluation or deployment."
+    expected:
+      score: 1.0
+      confidence: 0.85
+      evidence_ids: ["card_640#c0"]
+      reason: "Too common to stand out on a CV."
+  - level: 0
+    input: "No-code spreadsheet copy-paste task with zero engineering growth."
+    expected:
+      score: 0.0
+      confidence: 0.9
+      evidence_ids: ["card_650#c0"]
+      reason: "No software engineering skills exercised."
