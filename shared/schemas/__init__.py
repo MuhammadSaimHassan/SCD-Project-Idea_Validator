@@ -1,6 +1,7 @@
 """Canonical Pydantic schemas shared across all modules (M1-M13)."""
 
 from .contracts import (
+    ClaimItem,
     CheckClaimResult,
     CheckRequest,
     CheckResponse,
@@ -33,6 +34,7 @@ from .models import (
 )
 
 __all__ = [
+    "ClaimItem",
     "CheckClaimResult",
     "CheckRequest",
     "CheckResponse",
